@@ -1,0 +1,16 @@
+type: object
+required:
+  - name
+  - code
+  - name
+properties:
+  uuid:
+    type: string
+    format: uuid
+  name:
+    type: string
+  brand:
+    type: string
+  creation_time:
+    type: string
+    format: date-time

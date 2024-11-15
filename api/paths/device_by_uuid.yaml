@@ -1,0 +1,9 @@
+parameters:
+  - name: device-uuid
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+get:
+  operationId: getDeviceByUuid

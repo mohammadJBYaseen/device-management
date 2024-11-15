@@ -1,0 +1,78 @@
+get:
+  operationId: getDevices
+  parameters:
+    - name: brand_name
+      in: query
+      required: false
+      schema:
+        type: string
+    - name: page_number
+      in: query
+      required: false
+      description: 0 based index page number, default value is 0
+      schema:
+        type: integer
+        default: 0
+    - name: page_size
+      in: query
+      required: false
+      description: page size, number of items to be retrieved in each page, default 10
+      schema:
+        type: integer
+        default: 10
+    - name: sort_by
+      in: query
+      required: false
+      description: sorting result by name, or creation_time, default creation_time
+      schema:
+        type: string
+        enum:
+          - name
+          - creation_time
+        default: creation_time
+    - name: sort_dir
+      in: query
+      required: false
+      description: sorting result ASC, or DESC, default DESC
+      schema:
+        type: string
+        enum:
+          - ASC
+          - DESC
+        default: DESC
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "../schemas/common.yaml#/components/schemas/Page"
+              - type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "../device-management.yaml#/components/schemas/Device"
+
+post:
+  operationId: createDevice
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../device-management.yaml#/components/schemas/Device"
+  responses:
+    "201":
+      description: CREATED
+      content:
+        application/json:
+          schema:
+            $ref: "../device-management.yaml#/components/schemas/Device"
+    "400":
+      description: BAD REQUEST
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/common.yaml#/components/schemas/Error"

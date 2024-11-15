@@ -1,0 +1,6 @@
+{
+  "Server": {
+    "AppName": "device management",
+    "Port": 8080
+  }
+}

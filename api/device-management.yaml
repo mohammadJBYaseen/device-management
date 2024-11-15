@@ -1,0 +1,18 @@
+openapi: 3.0.1
+info:
+  title: Devices management app
+  description: Devices management app
+  license:
+    name: <TBD>
+  version: 0.0.1
+servers:
+  - url: http://devices-management.com
+paths:
+  /devices:
+    $ref: ./paths/devices.yaml
+  /devices/{device-uuid}:
+    $ref: ./paths/device_by_uuid.yaml
+components:
+  schemas:
+    Device:
+      $ref: ./schemas/device.yaml
