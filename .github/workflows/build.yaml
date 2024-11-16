@@ -29,26 +29,26 @@ jobs:
       - name: Run DB
         id: runDB
         run: |
-          cd ./...
+          cd  ..
           echo "$(pwd)"
           make run-ci
 
       - name: Build
         if: success()
         run: |
-          cd ./...
+          cd ..
           echo "$(pwd)"
           go build -v -buildvcs=false .
 
       - name: Test
         if: success()
         run: |
-          cd ./...
+          cd ..
           echo "$(pwd)"
           go test -v -buildvcs=false .
       - name: Tear Down DB
         if: steps.runDB.conclusion =='success'
         run: |
-          cd ./...
+          cd ..
           echo "$(pwd)"
           make dev-db-docker-delete
