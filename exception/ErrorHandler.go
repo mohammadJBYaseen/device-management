@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/richzw/gin-error"
+	"net/http"
 	"strconv"
 	"strings"
 )
@@ -44,6 +45,8 @@ func Recovery() gin.HandlerFunc {
 						writeJson(ctx, model.NewApiError("404", "record not found", "Invalid number format", apiError.Error()), 404)
 					} else if strings.Contains(apiError.Error(), "invalid UUID length") {
 						writeJson(ctx, model.NewApiError("400", "invalid uuid", "Invalid uuid format", apiError.Error()), 400)
+					} else if strings.Contains(apiError.Error(), "duplicate key value violates unique constraint ") {
+						writeJson(ctx, model.NewApiError("409", "Unique key violation", "Unique key violation", apiError.Error()), http.StatusConflict)
 					} else {
 						writeJson(ctx, model.NewApiError("500", apiError.Error(), "InternalServerError", apiError.Error()), 500)
 					}

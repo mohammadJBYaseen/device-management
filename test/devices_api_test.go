@@ -74,7 +74,7 @@ func SetBeforeAndAfterEach(beforeFunc, afterFunc func(*testing.T)) func(func(*te
 }
 
 func TestCreatDeviceFailed(t *testing.T) {
-	log.Println("start test")
+
 	req, err := http.NewRequest("POST", "/devices", bytes.NewBuffer([]byte(`{"name": "d"}`)))
 	if err != nil {
 		t.Errorf("Error in creating request: %v", err)
@@ -89,7 +89,7 @@ func TestCreatDeviceFailed(t *testing.T) {
 }
 
 func TestCreatDeviceSuccessfully(t *testing.T) {
-	log.Println("start test")
+
 	req, err := http.NewRequest("POST", "/devices", bytes.NewBuffer([]byte(`{"name": "Device1", "brand":"Brand1"}`)))
 	if err != nil {
 		t.Errorf("Error in creating request: %v", err)
@@ -108,7 +108,7 @@ func TestCreatDeviceSuccessfully(t *testing.T) {
 }
 
 func TestCreatDeviceDuplicateDeviceFailed(t *testing.T) {
-	log.Println("start test")
+
 	req, err := http.NewRequest("POST", "/devices", bytes.NewBuffer([]byte(`{"name": "Device2", "brand":"Brand2"}`)))
 	if err != nil {
 		t.Errorf("Error in creating request: %v", err)
@@ -119,7 +119,7 @@ func TestCreatDeviceDuplicateDeviceFailed(t *testing.T) {
 	w := httptest.NewRecorder()
 	Server.ServeHTTP(w, req)
 
-	req, err = http.NewRequest("POST", "/devices", bytes.NewBuffer([]byte(`{"name": "Device", "brand":"Brand"}`)))
+	req, err = http.NewRequest("POST", "/devices", bytes.NewBuffer([]byte(`{"name": "Device2", "brand":"Brand1"}`)))
 	if err != nil {
 		t.Errorf("Error in creating request: %v", err)
 	}
@@ -129,8 +129,74 @@ func TestCreatDeviceDuplicateDeviceFailed(t *testing.T) {
 	w = httptest.NewRecorder()
 	Server.ServeHTTP(w, req)
 
-	assert.EqualValues(t, http.StatusBadRequest, w.Code)
+	assert.EqualValues(t, http.StatusConflict, w.Code)
 	apiError := model.ApiError{}
 	json.Unmarshal([]byte(w.Body.String()), &apiError)
-	assert.EqualValues(t, apiError.Code, "400")
+	assert.EqualValues(t, apiError.Code, "409")
+}
+
+func TestUpdateDeviceSuccessfully(t *testing.T) {
+	log.Println("start test")
+	req, err := http.NewRequest("POST", "/devices", bytes.NewBuffer([]byte(`{"name": "Device3", "brand":"Brand3"}`)))
+	if err != nil {
+		t.Errorf("Error in creating request: %v", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+	Server.ServeHTTP(w, req)
+
+	assert.EqualValues(t, http.StatusCreated, w.Code)
+	device := model.Device{}
+	json.Unmarshal([]byte(w.Body.String()), &device)
+	assert.EqualValues(t, device.BrandName, "Brand3")
+
+	w = httptest.NewRecorder()
+	Server.ServeHTTP(w, req)
+
+	req, err = http.NewRequest("PUT", "/devices/"+device.UUID.String(), bytes.NewBuffer([]byte(`{"name": "Device3", "brand":"Brand4"}`)))
+	if err != nil {
+		t.Errorf("Error in creating request: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	w = httptest.NewRecorder()
+	Server.ServeHTTP(w, req)
+
+	assert.EqualValues(t, http.StatusAccepted, w.Code)
+	device = model.Device{}
+	json.Unmarshal([]byte(w.Body.String()), &device)
+	assert.EqualValues(t, device.BrandName, "Brand4")
+}
+
+func TestUpdateFailedSuccessfully(t *testing.T) {
+	log.Println("start test")
+	req, err := http.NewRequest("POST", "/devices", bytes.NewBuffer([]byte(`{"name": "Device4", "brand":"Brand4"}`)))
+	if err != nil {
+		t.Errorf("Error in creating request: %v", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+	Server.ServeHTTP(w, req)
+
+	assert.EqualValues(t, http.StatusCreated, w.Code)
+	device := model.Device{}
+	json.Unmarshal([]byte(w.Body.String()), &device)
+
+	w = httptest.NewRecorder()
+	Server.ServeHTTP(w, req)
+
+	req, err = http.NewRequest("PUT", "/devices/"+device.UUID.String(), bytes.NewBuffer([]byte(`{"name": "Device3"}`)))
+	if err != nil {
+		t.Errorf("Error in creating request: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	w = httptest.NewRecorder()
+	Server.ServeHTTP(w, req)
+
+	assert.EqualValues(t, http.StatusBadRequest, w.Code)
 }
