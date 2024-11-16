@@ -1,0 +1,295 @@
+openapi: 3.0.1
+info:
+  description: Devices management app
+  license:
+    name: <TBD>
+  title: Devices management app
+  version: 0.0.1
+servers:
+- url: http://localhost:8081
+paths:
+  /devices:
+    get:
+      operationId: getDevices
+      parameters:
+        - in: query
+          name: device_name
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: brand_name
+          required: false
+          schema:
+            type: string
+        - description: "0 based index page number, default value is 0"
+          in: query
+          name: page_number
+          required: false
+          schema:
+            default: 0
+            type: integer
+        - description: "page size, number of items to be retrieved in each page, default\
+          \ 10"
+          in: query
+          name: page_size
+          required: false
+          schema:
+            default: 10
+            type: integer
+        - description: "sorting result by name, or created_at, default created_at"
+          in: query
+          name: sort_by
+          required: false
+          schema:
+            default: created_at
+            enum:
+              - name
+              - created_at
+            type: string
+        - description: "sorting result ASC, or DESC, default DESC"
+          in: query
+          name: sort_dir
+          required: false
+          schema:
+            default: DESC
+            enum:
+              - ASC
+              - DESC
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevicesPage'
+          description: OK
+    post:
+      operationId: createDevice
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+          description: CREATED
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: BAD REQUEST
+  /devices/{device-uuid}:
+    get:
+      operationId: getDeviceByUuid
+      parameters:
+        - in: path
+          name: device-uuid
+          required: true
+          schema:
+            format: uuid
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        "404":
+          description: NOT FOUND
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    delete:
+      operationId: deleteDeviceByUuid
+      parameters:
+        - in: path
+          name: device-uuid
+          required: true
+          schema:
+            format: uuid
+            type: string
+      responses:
+        "204":
+          description: NO CONTENT
+        "404":
+          description: NOT FOUND
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    put:
+      operationId: updateDeviceByUuid
+      parameters:
+        - in: path
+          name: device-uuid
+          required: true
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+      responses:
+        "202":
+          description: NO CONTENT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        "404":
+          description: NOT FOUND
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "400":
+          description: BAD REQUEST
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    patch:
+      operationId: patchDeviceByUuid
+      parameters:
+        - in: path
+          name: device-uuid
+          required: true
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/JsonPatch'
+      responses:
+        "202":
+          description: NO CONTENT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        "404":
+          description: NOT FOUND
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "400":
+          description: BAD REQUEST
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+components:
+  schemas:
+    Device:
+      example:
+        created_at: 2000-01-23T04:56:07.000+00:00
+        name: name
+        uuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        brand: brand
+      properties:
+        uuid:
+          format: uuid
+          type: string
+        name:
+          type: string
+        brand:
+          type: string
+        created_at:
+          format: date-time
+          type: string
+      required:
+      - name
+      - brand
+      type: object
+    Page:
+      properties:
+        page_number:
+          type: integer
+        page_count:
+          type: integer
+        total_count:
+          type: integer
+        total_pages:
+          type: integer
+      required:
+      - page_count
+      - page_number
+      - total_count
+      - total_pages
+      type: object
+    ApiError:
+      example:
+        code: code
+        domain: domain
+        display_message: display_message
+        message: message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        domain:
+          type: string
+        display_message:
+          type: string
+      required:
+      - message
+      type: object
+    DevicesPage:
+      allOf:
+      - $ref: '#/components/schemas/Page'
+      - properties:
+          items:
+            items:
+              $ref: '#/components/schemas/Device'
+            type: array
+        type: object
+      example:
+        page_number: 0
+        total_count: 1
+        total_pages: 5
+        items:
+        - created_at: 2000-01-23T04:56:07.000+00:00
+          name: name
+          uuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          brand: brand
+        - created_at: 2000-01-23T04:56:07.000+00:00
+          name: name
+          uuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          brand: brand
+        page_count: 6
+    JsonPatch:
+      example:
+        op: replace
+        path: name
+        value: test
+      properties:
+        op:
+          enum:
+            - replace
+            - add
+            - remove
+        path:
+          type: string
+        value:
+          type: string
+      required:
+        - op
+        - path
+      type: object

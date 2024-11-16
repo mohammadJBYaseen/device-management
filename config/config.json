@@ -1,6 +1,20 @@
 {
-  "Server": {
-    "AppName": "device management",
-    "Port": 8080
+  "server": {
+    "app_name": "device management",
+    "port": 8080
+  },
+  "database": {
+    "host": "127.0.0.1",
+    "port": 5432,
+    "user_name": "dbowner",
+    "password": "onlyindev",
+    "database": "device_management",
+    "config": "",
+    "prefix": "",
+    "max_idle_conn": 2,
+    "conn_max_idle_time": "100ms",
+    "max_open_conn": 2,
+    "min_open_conn": 2,
+    "ssl_mode": "disable"
   }
 }

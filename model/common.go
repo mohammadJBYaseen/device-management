@@ -1,20 +1,50 @@
 package model
 
-type Page[T any] struct {
-	PageNumber int32 `json:"page_number"`
+type (
+	Page[T any] struct {
+		PageNumber int   `json:"page_number"`
+		PageSize   int   `json:"page_size"`
+		TotalCount int64 `json:"total_count"`
+		TotalPages int   `json:"total_pages"`
+		Items      []T   `json:"items"`
+		Sort       Sort  `json:"sort"`
+	}
 
-	PageCount int32 `json:"page_count"`
+	Sort struct {
+		SortBy    string `json:"sort_by"`
+		Direction string `json:"direction"`
+	}
 
-	TotalCount int32 `json:"total_count"`
+	SearchRequest struct {
+		PageSize   int
+		PageNumber int
+		DeviceName string
+		BrandName  string
+		Sort       Sort
+	}
 
-	TotalPages int32 `json:"total_pages"`
+	JsonPatch struct {
+		Op    string `json:"op" binding:"required"`
+		Value string `json:"value"`
+		Path  string `json:"path" binding:"required"`
+	}
 
-	Items []T `json:"items"`
+	ApiError struct {
+		Code string `json:"code,omitempty"`
 
-	Sort Sort `json:"sort"`
-}
+		Message string `json:"message"`
 
-type Sort struct {
-	SortBy    string `json:"sort_by"`
-	Direction string `json:"direction"`
+		Domain string `json:"domain,omitempty"`
+
+		DisplayMessage string `json:"display_message,omitempty"`
+	}
+)
+
+func NewApiError(code string, message string, domain string, displayMessage string) *ApiError {
+	return &ApiError{
+		Code:           code,
+		Message:        message,
+		Domain:         domain,
+		DisplayMessage: displayMessage,
+	}
 }

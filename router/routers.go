@@ -1,6 +1,7 @@
 package router
 
 import (
+	"device-management/exception"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -27,6 +28,7 @@ type Route struct {
 // NewRouter returns a new router.
 func NewRouter(controllers ...BaseController) *gin.Engine {
 	router := gin.Default()
+	router.Use(exception.Recovery())
 	return NewRouterWithGinEngine(router, controllers...)
 }
 
