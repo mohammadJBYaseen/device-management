@@ -10,7 +10,9 @@ import (
 	"github.com/golobby/config/v3"
 	"github.com/golobby/config/v3/pkg/feeder"
 	"gorm.io/gorm"
+	"log"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -70,10 +72,21 @@ func Load() AppProperties {
 		env = "dev"
 	}
 	cfg := AppProperties{}
-	jsonFeeder := feeder.Json{Path: "config/config.json"}
+	dir, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	configPath := "config/"
+
+	if strings.Contains(dir, "test") {
+		configPath = "../config"
+	}
+
+	log.Println(fmt.Sprintf("root directory %s", dir))
+	jsonFeeder := feeder.Json{Path: configPath + "/config.json"}
 	feederChain := config.New().AddFeeder(jsonFeeder)
-	envConfigPath := fmt.Sprintf("config/config-%s.json", env)
-	exists, err := fileExist(envConfigPath)
+	envConfigPath := fmt.Sprintf(configPath+"/config-%s.json", env)
+	exists, err = fileExist(envConfigPath)
 	if err != nil {
 		panic(err)
 	} else if exists {
