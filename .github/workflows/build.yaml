@@ -17,7 +17,6 @@ on:
       - labeled
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -27,9 +26,29 @@ jobs:
         uses: actions/setup-go@v5.1.0
         with:
           go-version: '1.22.3'
+      - name: Run DB
+        id: runDB
+        run: |
+          cd ./...
+          echo "$(pwd)"
+          make run-ci
 
       - name: Build
-        run: go build -v -buildvcs=false ./...
+        if: success()
+        run: |
+          cd ./...
+          echo "$(pwd)"
+          go build -v -buildvcs=false .
 
       - name: Test
-        run: go test -v -buildvcs=false ./...
+        if: success()
+        run: |
+          cd ./...
+          echo "$(pwd)"
+          go test -v -buildvcs=false .
+      - name: Tear Down DB
+        if: steps.runDB.conclusion =='success'
+        run: |
+          cd ./...
+          echo "$(pwd)"
+          make dev-db-docker-delete
