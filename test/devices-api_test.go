@@ -85,7 +85,7 @@ func TestCreatDeviceFailed(t *testing.T) {
 	w := httptest.NewRecorder()
 	Server.ServeHTTP(w, req)
 
-	assert.EqualValues(t, http.StatusBadRequest, w.Code)
+	assert.EqualValues(t, w.Code, http.StatusBadRequest)
 }
 
 func TestCreatDeviceSuccessfully(t *testing.T) {
@@ -100,7 +100,7 @@ func TestCreatDeviceSuccessfully(t *testing.T) {
 	w := httptest.NewRecorder()
 	Server.ServeHTTP(w, req)
 
-	assert.EqualValues(t, http.StatusCreated, w.Code)
+	assert.EqualValues(t, w.Code, http.StatusCreated)
 	device := model.Device{}
 	json.Unmarshal([]byte(w.Body.String()), &device)
 	assert.EqualValues(t, device.BrandName, "Brand")
@@ -129,7 +129,7 @@ func TestCreatDeviceDuplicateDeviceFailed(t *testing.T) {
 	w = httptest.NewRecorder()
 	Server.ServeHTTP(w, req)
 
-	assert.EqualValues(t, http.StatusConflict, w.Code)
+	assert.EqualValues(t, w.Code, http.StatusConflict)
 	apiError := model.ApiError{}
 	json.Unmarshal([]byte(w.Body.String()), &apiError)
 	assert.EqualValues(t, apiError.Code, "409")
@@ -147,7 +147,7 @@ func TestUpdateDeviceSuccessfully(t *testing.T) {
 	w := httptest.NewRecorder()
 	Server.ServeHTTP(w, req)
 
-	assert.EqualValues(t, http.StatusCreated, w.Code)
+	assert.EqualValues(t, w.Code, http.StatusCreated)
 	device := model.Device{}
 	json.Unmarshal([]byte(w.Body.String()), &device)
 	assert.EqualValues(t, device.BrandName, "Brand3")
@@ -164,7 +164,7 @@ func TestUpdateDeviceSuccessfully(t *testing.T) {
 	w = httptest.NewRecorder()
 	Server.ServeHTTP(w, req)
 
-	assert.EqualValues(t, http.StatusAccepted, w.Code)
+	assert.EqualValues(t, w.Code, http.StatusAccepted)
 	device = model.Device{}
 	json.Unmarshal([]byte(w.Body.String()), &device)
 	assert.EqualValues(t, device.BrandName, "Brand4")
@@ -182,7 +182,7 @@ func TestUpdateFailedSuccessfully(t *testing.T) {
 	w := httptest.NewRecorder()
 	Server.ServeHTTP(w, req)
 
-	assert.EqualValues(t, http.StatusCreated, w.Code)
+	assert.EqualValues(t, w.Code, http.StatusCreated)
 	device := model.Device{}
 	json.Unmarshal([]byte(w.Body.String()), &device)
 
@@ -198,5 +198,47 @@ func TestUpdateFailedSuccessfully(t *testing.T) {
 	w = httptest.NewRecorder()
 	Server.ServeHTTP(w, req)
 
-	assert.EqualValues(t, http.StatusBadRequest, w.Code)
+	assert.EqualValues(t, w.Code, http.StatusBadRequest)
+}
+
+func TestDeleteDeviceSuccessfully(t *testing.T) {
+	log.Println("start test")
+	req, err := http.NewRequest("POST", "/devices", bytes.NewBuffer([]byte(`{"name": "Device5", "brand":"Brand3"}`)))
+	if err != nil {
+		t.Errorf("Error in creating request: %v", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+	Server.ServeHTTP(w, req)
+
+	assert.EqualValues(t, w.Code, http.StatusCreated)
+	device := model.Device{}
+	json.Unmarshal([]byte(w.Body.String()), &device)
+	assert.EqualValues(t, device.Name, "Device5")
+
+	w = httptest.NewRecorder()
+	Server.ServeHTTP(w, req)
+
+	req, err = http.NewRequest("DELETE", "/devices/"+device.UUID.String(), nil)
+	if err != nil {
+		t.Errorf("Error in creating request: %v", err)
+	}
+	w = httptest.NewRecorder()
+	Server.ServeHTTP(w, req)
+
+	assert.EqualValues(t, w.Code, http.StatusNoContent)
+
+	w = httptest.NewRecorder()
+	Server.ServeHTTP(w, req)
+
+	req, err = http.NewRequest("GET", "/devices/"+device.UUID.String(), nil)
+	if err != nil {
+		t.Errorf("Error in creating request: %v", err)
+	}
+
+	w = httptest.NewRecorder()
+	Server.ServeHTTP(w, req)
+	assert.EqualValues(t, w.Code, http.StatusNotFound)
 }
