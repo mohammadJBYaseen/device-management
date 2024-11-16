@@ -35,3 +35,6 @@ You can override application config at run time by the following ways:
 
 ## CI/CD with github action runner
 see [github action](https://docs.github.com/en/actions)
+
+# TODO Next
+Add  build docker image and deploy script to cloud
