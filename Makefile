@@ -24,13 +24,16 @@ db-create:
 db-ci:
 	cat ./db/setup/ci_setup.sql| docker exec -i pg psql -U dbowner -d postgres
 	cat ./db/setup/db_setup.sql| docker exec -i pg psql -U dbowner -d postgres
-	make db+
+	make db-migrate
 	cat ./db/setup/dev_setup.sql| docker exec -i pg psql -U dbowner -d postgres
 
 db-clean:
 	make db-
 	cat ./db/setup/db_remove.sql| docker exec -i pg psql -U dbowner -d postgres
 	make db-ci
+db-migrate:
+	#Docker CLI variant
+	docker run --rm -v ./db/migrations:/migrations --network host migrate/migrate -path=/migrations -database postgres://$(PGUSER):$(PGPASSWORD)@$(PGHOST):5432/$(DB_NAME)?sslmode=$(SSL_MODE) up
 db+:
 	migrate -source file://db/migrations -database postgres://$(PGUSER):$(PGPASSWORD)@$(PGHOST):5432/$(DB_NAME)?sslmode=$(SSL_MODE) up
 db-:
