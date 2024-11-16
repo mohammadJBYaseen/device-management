@@ -103,8 +103,8 @@ func TestCreatDeviceSuccessfully(t *testing.T) {
 	assert.EqualValues(t, w.Code, http.StatusCreated)
 	device := model.Device{}
 	json.Unmarshal([]byte(w.Body.String()), &device)
-	assert.EqualValues(t, device.BrandName, "Brand")
-	assert.EqualValues(t, device.Name, "Device")
+	assert.EqualValues(t, device.BrandName, "Brand1")
+	assert.EqualValues(t, device.Name, "Device1")
 }
 
 func TestCreatDeviceDuplicateDeviceFailed(t *testing.T) {
