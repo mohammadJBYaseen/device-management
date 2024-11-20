@@ -19,9 +19,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: ['amd64']
+#    strategy:
+#      matrix:
+#        arch: ['amd64']
 
     steps:
 
@@ -36,7 +36,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5.1.0
         with:
-          architecture: ${{matrix.arch}}
+#          architecture: ${{matrix.arch}}
           go-version: "go 1.23"
 
       - name: Run DB
