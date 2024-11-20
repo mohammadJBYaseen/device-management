@@ -27,7 +27,7 @@ jobs:
       - name: Load environment variables
         uses: c-py/action-dotenv-to-setenv@v5
         with:
-          env-file: ".env"
+          env-file: ".github/workflows/.env"
 
       - name: Set up Go
         uses: actions/setup-go@v5.1.0
