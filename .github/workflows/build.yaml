@@ -19,12 +19,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: ['x86_64']
 
     steps:
-
+      - name: Echo os
+        run: |
+          dpkg-architecture -q DEB_BUILD_ARCH
       - name: Check out code
         uses: actions/checkout@v4.2.2
 
