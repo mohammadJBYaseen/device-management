@@ -18,13 +18,13 @@ before:
 builds:
   - env:
       - CGO_ENABLED=0
-    goarch:
-      - arm64
-      - amd64
+#    goarch:
+#      - arm64
+#      - amd64
 #      - x86_64
     goos:
       - linux
-#      - windows
+      - windows
       - darwin
 
 archives:
