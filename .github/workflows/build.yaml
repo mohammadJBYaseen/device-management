@@ -25,9 +25,9 @@ jobs:
         uses: actions/checkout@v4.2.2
 
       - name: Load environment variables
-        uses: dotenv-actions/setup-dotenv@v2
+        uses: c-py/action-dotenv-to-setenv@v5
         with:
-          dotenv_path: ".env"
+          env-file: ".env"
 
       - name: Set up Go
         uses: actions/setup-go@v5.1.0
