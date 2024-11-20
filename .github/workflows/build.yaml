@@ -37,7 +37,7 @@ jobs:
         uses: actions/setup-go@v5.1.0
         with:
 #          architecture: ${{matrix.arch}}
-          go-version: "go 1.23"
+          go-version: ${{env.GO_VERSION}}
 
       - name: Run DB
         id: runDB
