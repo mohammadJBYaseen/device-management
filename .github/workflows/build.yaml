@@ -20,12 +20,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
+
+      - name: Check out code
+        uses: actions/checkout@v4.2.2
+
+      - name: Load environment variables
+        uses: dotenv-actions/setup-dotenv@v2
+        with:
+          dotenv_path: ".env"
 
       - name: Set up Go
         uses: actions/setup-go@v5.1.0
         with:
-          go-version: '1.22.3'
+          go-version: ${{env.GO_VERSION}}
+
       - name: Run DB
         id: runDB
         run: |
