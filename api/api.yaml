@@ -13,12 +13,12 @@ paths:
       operationId: getDevices
       parameters:
         - in: query
-          name: device_name
+          name: name
           required: false
           schema:
             type: string
         - in: query
-          name: brand_name
+          name: brand
           required: false
           schema:
             type: string

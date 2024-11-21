@@ -7,13 +7,14 @@ import (
 	"device-management/service"
 	"errors"
 	"fmt"
-	"github.com/golobby/config/v3"
-	"github.com/golobby/config/v3/pkg/feeder"
-	"gorm.io/gorm"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/golobby/config/v3"
+	"github.com/golobby/config/v3/pkg/feeder"
+	"gorm.io/gorm"
 )
 
 var ApplicationProperties AppProperties
@@ -42,6 +43,7 @@ type (
 	ServerProperties struct {
 		AppName string `json:"app_name" env:"APP_NAME"`
 		Port    int    `json:"port" env:"SERVER_PORT"`
+		Host    string `json:"host" env:"SERVER_HOST"`
 	}
 
 	DatabaseProperties struct {

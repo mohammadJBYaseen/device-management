@@ -6,12 +6,13 @@ import (
 	"device-management/model"
 	"device-management/repository"
 	"fmt"
+
 	"github.com/google/uuid"
 )
 
 type (
 	DeviceService interface {
-		CreatDevice(ctx context.Context, device model.Device) (model.Device, error)
+		CreateDevice(ctx context.Context, device model.Device) (model.Device, error)
 		GetDevice(ctx context.Context, deviceUuid uuid.UUID) (model.Device, error)
 		UpdateDevice(ctx context.Context, deviceUuid uuid.UUID, device model.Device) (model.Device, error)
 		PatchDevice(ctx context.Context, deviceUuid uuid.UUID, device []model.JsonPatch) (model.Device, error)
@@ -30,9 +31,9 @@ func NewDeviceService(repo repository.DeviceRepository) DeviceService {
 	}
 }
 
-func (service *deviceServiceImpl) CreatDevice(ctx context.Context, device model.Device) (model.Device, error) {
+func (service *deviceServiceImpl) CreateDevice(ctx context.Context, device model.Device) (model.Device, error) {
 	device.UUID = uuid.New()
-	return service.repo.CreatDevice(ctx, device)
+	return service.repo.CreateDevice(ctx, device)
 }
 
 func (service *deviceServiceImpl) UpdateDevice(ctx context.Context, deviceUuid uuid.UUID, updated model.Device) (model.Device, error) {
