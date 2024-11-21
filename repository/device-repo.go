@@ -4,14 +4,15 @@ import (
 	"context"
 	"device-management/exception"
 	"device-management/model"
+	"math"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"math"
 )
 
 type (
 	DeviceRepository interface {
-		CreatDevice(ctx context.Context, device model.Device) (model.Device, error)
+		CreateDevice(ctx context.Context, device model.Device) (model.Device, error)
 		GetDevice(ctx context.Context, id uuid.UUID) (model.Device, error)
 		UpdateDevice(ctx context.Context, device model.Device) (model.Device, error)
 		DeleteDevice(ctx context.Context, deviceUuid uuid.UUID) error
@@ -22,6 +23,7 @@ type (
 		db *gorm.DB
 	}
 )
+
 
 func NewDeviceRepository(db *gorm.DB) DeviceRepository {
 	return &deviceRepositoryImpl{
@@ -37,7 +39,7 @@ func (repo *deviceRepositoryImpl) GetDevice(ctx context.Context, uuid uuid.UUID)
 	return device, nil
 }
 
-func (repo *deviceRepositoryImpl) CreatDevice(ctx context.Context, device model.Device) (model.Device, error) {
+func (repo *deviceRepositoryImpl) CreateDevice(ctx context.Context, device model.Device) (model.Device, error) {
 	if err := repo.db.WithContext(ctx).Create(&device).Error; err != nil {
 		return model.Device{}, err
 	}
@@ -66,8 +68,18 @@ func (repo *deviceRepositoryImpl) SearchDevices(ctx context.Context, request mod
 	var devices []model.Device
 	var err error
 	var count int64
+	
+	dbTx := repo.db.WithContext(ctx)
+	
+	if request.DeviceName != "" {
+    	dbTx = dbTx.Where("device_name LIKE ?", "%" + request.DeviceName + "%")
+    }
+    
+    if request.BrandName != "" {
+        dbTx = dbTx.Where("brand_name LIKE ?", "%" + request.BrandName + "%")
+    }
 
-	if err := repo.db.WithContext(ctx).Model(&model.Device{}).Count(&count).Error; err != nil {
+	if err := dbTx.Model(&model.Device{}).Count(&count).Error; err != nil {
 		return model.Page[model.Device]{
 			PageNumber: request.PageNumber,
 			PageSize:   request.PageSize,
@@ -77,16 +89,8 @@ func (repo *deviceRepositoryImpl) SearchDevices(ctx context.Context, request mod
 			Sort:       request.Sort,
 		}, err
 	}
-
-	var dbTx = repo.db.WithContext(ctx).Scopes(Paginate(request.PageNumber, request.PageSize)).Order(Order(request.Sort))
-
-	if request.DeviceName != "" {
-		dbTx = dbTx.Where("device_name LIKE ?", request.DeviceName)
-	}
-
-	if request.BrandName != "" {
-		dbTx = dbTx.Where("brand_name LIKE ?", request.BrandName)
-	}
+    offset := request.PageNumber * request.PageSize
+	dbTx = dbTx.Model(&model.Device{}).Order(Order(mapSort(request.Sort))).Offset(offset).Limit(request.PageSize)
 
 	if err := dbTx.Find(&devices).Error; err != nil {
 		return model.Page[model.Device]{
@@ -112,16 +116,12 @@ func (repo *deviceRepositoryImpl) SearchDevices(ctx context.Context, request mod
 }
 
 func mapSort(sort model.Sort) model.Sort {
-	if sort.SortBy == "name" {
-		return model.Sort{
-			SortBy:    "device_name",
-			Direction: sort.Direction,
-		}
-	} else if sort.SortBy == "creation_date" {
-		return sort
-	} else {
-		panic(exception.BadRequest{
-			Message: "Invalid sort field: " + sort.SortBy,
-		})
-	}
+    sortFieldMapping := map[string] string {
+        "name": "device_name",
+        "created_at": "created_at",
+    }
+    return model.Sort{
+    			SortBy:   sortFieldMapping[sort.SortBy],
+    			Direction: sort.Direction,
+    		}
 }

@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: device-management
+  labels:
+    app: device-management
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: device-management
+  template:
+    metadata:
+      labels:
+        app: device-management
+    spec:
+      containers:
+        - name: device-management
+          image: $IMAGE_NAME
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+      imagePullSecrets:
+        - name: $DOCKER_REGISTRY_SECRET_NAME
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: device-management-lb
+  labels:
+    app: device-management
+  annotations:
+    oci.oraclecloud.com/load-balancer-type: "nlb"
+    oci-network-load-balancer.oraclecloud.com/backend-policy: "THREE_TUPLE"
+    oci.oraclecloud.com/security-rule-management-mode: "NSG"
+    oci-network-load-balancer.oraclecloud.com/security-list-management-mode:  "None"
+    oci.oraclecloud.com/oci-backend-network-security-group: $OCI_NETWORK_SG_BACKEND
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+  selector:
+    app: device-management

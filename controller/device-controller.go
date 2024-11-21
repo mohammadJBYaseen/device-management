@@ -7,15 +7,16 @@ import (
 	"device-management/router"
 	"device-management/service"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"net/http"
 	"slices"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 var (
-	supportedSortBy        = []string{"creation_time", "name"}
+	supportedSortBy        = []string{"created_at", "name"}
 	supportedSortDirection = []string{"ASC", "DESC"}
 )
 
@@ -43,11 +44,11 @@ func NewDeviceController(deviceService service.DeviceService) DeviceController {
 }
 
 func (deviceController *deviceControllerImpl) CreateDevice(ctx context.Context, device model.Device) model.Device {
-	creatDevice, err := deviceController.deviceService.CreatDevice(ctx, device)
+	createdDevice, err := deviceController.deviceService.CreateDevice(ctx, device)
 	if err != nil {
 		panic(err)
 	}
-	return creatDevice
+	return createdDevice
 }
 
 func (deviceController *deviceControllerImpl) GetDeviceByUuid(ctx context.Context, deviceUuid uuid.UUID) model.Device {
@@ -168,8 +169,8 @@ func (deviceController *deviceControllerImpl) patchDeviceByUuidHandler() gin.Han
 
 func (deviceController *deviceControllerImpl) getDevicesHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		deviceName := ctx.Query("device_name")
-		brandName := ctx.Query("brand_name")
+		deviceName := ctx.Query("name")
+		brandName := ctx.Query("brand")
 		sortBy := ctx.DefaultQuery("sort_by", "created_at")
 		if !slices.Contains(supportedSortBy, sortBy) {
 			panic(exception.BadRequest{Message: fmt.Sprintf("unsupported sort_by, value must be one of: [created_at, name], provided: %s", sortBy)})
@@ -207,7 +208,7 @@ func (deviceController *deviceControllerImpl) Routes() []router.Route {
 			"GetDeviceByUuid",
 			http.MethodGet,
 			"/devices/:device-uuid",
-			"",
+			"application/json",
 			deviceController.getDeviceByUuidHandler(),
 		},
 		{
