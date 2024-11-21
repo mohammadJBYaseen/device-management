@@ -3,11 +3,12 @@ export PGPASSWORD ?= postgres
 export PGHOST ?= localhost
 export DB_NAME ?= device_management
 export SSL_MODE ?= disable
-
 run-ci:
+	make run-ci-db
+	make dockerized-app
+run-ci-db:
 	make dev-db-docker
 	make db-ci
-	make dockerized-app
 dev-db-docker:
 	docker run -d --name pg --env=POSTGRES_PASSWORD=$(PGPASSWORD) --health-cmd "pg_isready -U $(PGUSER)" --health-interval 10s --health-timeout 5s --health-retries 5 \
 		-p 5432:5432 -v ./db/setup/ci_setup.sql:/docker-entrypoint-initdb.d/init.sql -d postgres:17
