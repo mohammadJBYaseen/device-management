@@ -30,17 +30,18 @@ jobs:
           sudo apt update
           sudo apt install golang-1.23
 
-      - name: Run DB
-        id: runDB
-        run: |
-          echo "$(pwd)"
-          make run-ci
-
       - name: Build
         if: success()
         run: |
           echo "$(pwd)"
           go build -v -buildvcs=false ./...
+
+      - name: Run DB
+        if: success()
+        id: runDB
+        run: |
+          echo "$(pwd)"
+          make run-ci
 
       - name: Test
         if: success()
